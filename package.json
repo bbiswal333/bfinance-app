@@ -19,11 +19,12 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng build --prod && node server.js",
+    "start": "node server.js",
     "build": "ng build --prod --aot --buildOptimizer --commonChunk --vendorChunk --optimization --progress",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "postinstall": "ng build --aot -prod"
   },
   "private": true,
   "dependencies": {
@@ -58,7 +59,10 @@
     "tslib": "^1.9.0",
     "zone.js": "^0.8.28",
     "express": "^4.16.3",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "@angular/cli": "^7.2.2",
+    "@angular/compiler-cli": "^7.2.5",
+    "typescript": "~3.2.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.12.2",

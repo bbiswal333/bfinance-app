@@ -1,0 +1,136 @@
+<div class="animated fadeIn">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    <strong>My Profile</strong>
+                    <button *ngIf="user" [disabled]="isEdit" (click)="onEdit()" style="float: right" type="button" class="btn btn-sm btn-primary"><i class="fa fa-pencil"></i> Edit</button>
+                </div>
+                <div style="margin: 20px 0px 20px 20px" *ngIf="!user">
+                    <i class="fa fa-spinner fa-spin"></i> Loading...
+                </div>
+                <div class="card-body" *ngIf="user">
+                    <div *ngIf="validProfile" class="success">
+                        <div class="alert alert-success alert-dismissible">
+                            {{profileSuccessMessage}}
+                        </div>
+                    </div>
+                    <div *ngIf="invalidProfile" class="error">
+                        <div class="alert alert-danger" role="alert" style="display:block">
+                            <p *ngFor="let error of errorMessage">
+                                {{error}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <form [formGroup]="myProfileForm" (ngSubmit)="onProfileSubmit()" class="form-horizontal" *ngIf="user">
+                        <div class="form-group row">
+                            <div class="col-md-12">
+
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-user"></i></span>
+                                    </div>
+                                    <input formControlName="firstname" type="text" id="input1-group1" name="input1-group1" class="{{hasFirstnameError == true ? 'form-control is-invalid' : 'form-control'}}"
+                                        placeholder="Firstname">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-user"></i></span>
+                                    </div>
+                                    <input formControlName="lastname" type="text" id="input1-group2" name="input1-group1" class="{{hasLastnameError == true ? 'form-control is-invalid' : 'form-control'}}"
+                                        placeholder="Lastname">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                                    </div>
+                                    <input formControlName="email" type="text" id="input1-group3" name="input1-group1" class="form-control" placeholder="Email">
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <button [disabled]="!isEdit" (click)="onProfileSubmit()" type="submit" class="btn btn-sm btn-success"><i class="fa fa-dot-circle-o"></i> Save</button>
+                    <button (click)="onCancelEdit()" [disabled]="!isEdit" type="button" class="btn btn-sm btn-danger"><i class="fa fa-ban"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Change Password</strong>
+                </div>
+                <div class="card-body">
+
+                    <div *ngIf="changePasswordSuccess" class="success">
+                        <div class="alert alert-success alert-dismissible">
+                            {{changePasswordSuccessMsg}}
+                        </div>
+                    </div>
+                    <div *ngIf="changePasswordError" class="error">
+                        <div class="alert alert-danger" role="alert" style="display:block">
+                            <p *ngFor="let error of changePasswordErrorMsg">
+                                {{error}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <form [formGroup]="changePasswordForm" class="form-horizontal">
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div style="color: red" class="error" *ngIf="changePasswordForm.controls['oldPassword'].hasError('required') && changePasswordForm.controls['oldPassword'].touched"><i>*Old Password is required</i></div>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="icon-lock"></i></span>
+                                    </div>
+                                    <input formControlName="oldPassword" type="password" id="input1-group4" name="input1-group1" class="form-control" placeholder="Old Password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div style="color: red" class="error" *ngIf="changePasswordForm.controls['newPassword'].hasError('required') && changePasswordForm.controls['newPassword'].touched"><i>*New Password is required</i></div>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="icon-lock"></i></span>
+                                    </div>
+                                    <input formControlName="newPassword" type="password" id="input1-group5" name="input1-group1" class="form-control" placeholder="New Password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div style="color: red" class="error" *ngIf="changePasswordForm.controls['confirmNewPassword'].hasError('required') && changePasswordForm.controls['confirmNewPassword'].touched"><i>*Confirm New Password is required</i></div>
+                                
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="icon-lock"></i></span>
+                                    </div>
+                                    <input formControlName="confirmNewPassword" type="password" id="input1-group6" name="input1-group1" class="form-control"
+                                        placeholder="Confirm New Password">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <button (click)="onChangePasswordSubmit()" type="submit" class="btn btn-sm btn-success"><i class="fa fa-dot-circle-o"></i> Submit</button>
+                    <button (click)="onChangePasswordReset()" type="reset" class="btn btn-sm btn-danger"><i class="fa fa-ban"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,299 @@
+<div class="row">
+    <!-- col start -->
+    <div class="text-center" *ngIf="!loan">
+        <h5><i class="fa fa-spinner fa-spin"></i> Loading...</h5>
+    </div>
+    <div class="col-sm-6 col-md-12" *ngIf="loan!=null">
+        <div class="card card-accent-{{loan.loanType == 'EL'? 'success':'primary'}}">
+            <div class="card-header">
+                <div *ngIf="loan.loanType=='EL'">
+                    <span class="badge badge-success">Education Loan</span>&nbsp;
+                    <span *ngIf="loan.balanceAmount == 0" class="badge badge-success">Loan closed</span>
+                </div>
+                <div *ngIf="loan.loanType=='HL'">
+                    <span class="badge badge-primary">Home Loan</span>&nbsp;
+                    <span *ngIf="loan.balanceAmount == 0" class="badge badge-success">Loan closed</span>
+                </div>
+            </div>
+            <div [ngStyle]="getClosedLoanStyle(loan.balanceAmount)" class="card-body">
+                <label class="col-form-label"><i class="fa fa-key"></i> Loan ID &nbsp;&nbsp; </label>
+                <span style="color: grey">{{loan.loanId}}</span>
+                <br>
+                <label class="col-form-label"><i class="fa fa-bank"></i> Bank &nbsp;&nbsp; </label>
+                <span class="badge badge-primary">{{loan.loanBank}}</span>
+                <br>
+                <label class="col-form-label"><i class="fa fa-pencil"></i> Description &nbsp;&nbsp; </label>
+                <span><i>{{loan.loanDesc}}</i></span>
+                <div class="row">
+                    <div class="col-sm-6 col-md-4">
+                        <label class="col-form-label">Principal Amount </label>
+                        <div class="input-group">
+                            <h5>
+                                <i class="fa fa-rupee"></i>&nbsp;
+                                {{loan.principalAmount}}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <label class="col-form-label">Balance Amount </label>
+                        <div class="input-group">
+                            <span *ngIf="loan.balanceAmount ==0" class="badge badge-secondary">settled</span>
+                            <h3 *ngIf="loan.balanceAmount !=0" style="color: tomato; font-weight: bold">
+                                <i class="fa fa-rupee"></i>&nbsp;
+                                {{loan.balanceAmount}}
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <label class="col-form-label">Interest </label>
+                        <div class="input-group">
+                            <h5>
+                                <span class="badge badge-warning"><b>{{loan.interestRate}}</b><i
+                                        class="fa fa-percent"></i></span>
+                            </h5>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <label class="col-form-label">Total Principal Paid </label>
+                        <div class="input-group">
+                            <h5 style="color:green">
+                                <i class="fa fa-rupee"></i>&nbsp;
+                                {{loan.totalPrincipalPaid - loan.totalInterestPaid}}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <label class="col-form-label">Total Interest Paid </label>
+                        <div class="input-group">
+                            <h5 style="color:orchid">
+                                <i class="fa fa-rupee"></i>&nbsp;
+                                {{loan.totalInterestPaid}}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                            <label class="col-form-label">Total Amount Paid </label>
+                            <div class="input-group">
+                                <h5 style="color:purple">
+                                    <i class="fa fa-rupee"></i>&nbsp;
+                                    {{loan.totalPrincipalPaid}}
+                                </h5>
+                            </div>
+                        </div>
+                </div>
+                <label class="col-form-label">Progress</label>
+                <div class="clearfix">
+                    <div class="float-left">
+                        <strong>
+                            {{loanService.calculateProgress(loan.principalAmount,loan.balanceAmount)}}%
+                        </strong>
+                    </div>
+                </div>
+                <div class="progress progress-xs">
+                    <div [ngClass]="loanService.getProgressClass(loanService.calculateProgress(loan.principalAmount,loan.balanceAmount))"
+                        role="progressbar"
+                        [ngStyle]="loanService.getProgressStyle(loanService.calculateProgress(loan.principalAmount,loan.balanceAmount))"
+                        aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                &nbsp;
+                <div class="row">
+                    <div class="col-sm-6 col-md-12 text-center">
+                        <button type="button" class="btn btn-danger btn-lg"><i class="fa fa-trash"></i> Delete
+                            Loan</button>&nbsp;
+                        <button (click)="onPay()" type="button" class="btn btn-success btn-lg"><i
+                                class="fa fa-rupee"></i> Pay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- col start -->
+    <h5 *ngIf="!loanStatments"><i class="fa fa-spinner fa-spin"></i> Loading..</h5>
+
+    <div class="col-sm-6 col-md-12">
+        <div class="card" *ngIf="loanStatments">
+            <div class="card-header">
+                <h5>Loan Statements</h5>
+            </div>
+            <div class="card-body">
+
+                <p *ngIf="loanStatments && loanStatments.length == 0" class="text-center"><i> <b><i
+                                class="fa fa-smile-o"></i> No loan statments found</b></i>
+                </p>
+                <table *ngIf="loanStatments && loanStatments.length > 0"
+                    class="table table-responsive-sm table-hover table-outline mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>#</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Amount</th>
+                            <th class="text-center">Type</th>
+                            <th class="text-center">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let statment of loanStatments | slice:0:showStatements; let i=index">
+                            <td>
+                                <h6>#{{i+1}}</h6>
+                            </td>
+                            <td class="text-center">
+                                <div>{{statment.desc}}</div>
+
+                            </td>
+                            <td class="text-center">
+                                <i class="fa fa-rupee"></i>
+                                <span style="color:red" *ngIf="statment.transactionType == 'DEBIT'">
+                                    <b>{{statment.transactionAmount}}</b>
+                                </span>
+                                <span style="color:green" *ngIf="statment.transactionType == 'CREDIT'">
+                                    <b> {{statment.transactionAmount}}</b>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span *ngIf="statment.transactionType == 'DEBIT'">
+                                    <i style="color:red" class="fa fa-arrow-down"></i>
+                                    <b>{{statment.transactionType}}</b>
+                                </span>
+                                <span *ngIf="statment.transactionType == 'CREDIT'">
+                                    <i style="color:green" class="fa fa-arrow-up"></i>
+                                    <b>{{statment.transactionType}}</b>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {{statment.date}}
+                            </td>
+
+                        </tr>
+
+
+                    </tbody>
+                </table>
+                <br>
+                <button style="margin: 0 40% 0 40%" class="btn btn-primary"
+                    *ngIf="showStatements < loanStatments.length" (click)="loadMoreStatements()">
+                    <i class="fa fa-arrow-down"></i> Show More
+                </button>
+                <button style="margin: 0 40% 0 40%" class="btn btn-primary"
+                    *ngIf="loanStatments.length > 5 && showStatements > loanStatments.length" (click)="showLess()">
+                    <i class="fa fa-arrow-up"></i> Show less</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div bsModal #payLoanModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document">
+        <div class="modal-content">
+            <form [formGroup]="payLoanForm">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">Loan Payment</h4>
+                    <button type="button" class="close" (click)="payLoanModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <!-- <div style="color:red" class="error" *ngIf="addLoanForm.controls['loanDesc'].hasError('required') && addLoanForm.controls['loanDesc'].touched"><i>*Loan Description is required</i></div>
+                       -->
+                                <label class="col-form-label" for="appendedPrependedInput">Transaction Type</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-tag"></i></span>
+                                    </div>
+                                    <select formControlName="transactionType" class="form-control">
+                                        <option value="CREDIT">CREDIT</option>
+                                        <option value="DEBIT">DEBIT</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                    <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDate'].hasError('required') && 
+                                    payLoanForm.controls['transactionDate'].touched 
+                                    "><i>*Transaction date is required</i></div>
+
+                                    <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDate'].hasError('pattern') && 
+                                    payLoanForm.controls['transactionDate'].touched 
+                                    "><i>*Please input date with this format dd-mm-yyyy</i></div>
+                                    
+                                <label class="col-form-label" for="appendedPrependedInput">Transaction Date</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                    <input formControlName="transactionDate" type="text" class="{{
+                                        payLoanForm.controls['transactionDate'].hasError('required') && 
+                                    payLoanForm.controls['transactionDate'].touched ||
+                                    payLoanForm.controls['transactionDate'].hasError('pattern') && 
+                                    payLoanForm.controls['transactionDate'].touched
+                                    ? 'form-control is-invalid' : 'form-control'
+                                    }}"
+                                        #dp="bsDatepicker" bsDatepicker
+                                        [(bsValue)]="myDateValue" value="{{ myDateValue | date:'dd-MM-yyyy' }}">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionAmount'].hasError('required') && 
+                                payLoanForm.controls['transactionAmount'].touched 
+                                "><i>*Transaction amount is required</i></div>
+                                <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionAmount'].hasError('pattern') && 
+                                payLoanForm.controls['transactionAmount'].touched 
+                                "><i>*Transaction amount value should be numeric</i></div>
+
+                                <label class="col-form-label" for="appendedPrependedInput">Transaction Amount</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-rupee"></i></span>
+                                    </div>
+                                    <input formControlName="transactionAmount" type="text" class="
+                                    {{payLoanForm.controls['transactionAmount'].hasError('required') && payLoanForm.controls['transactionAmount'].touched || 
+                                    payLoanForm.controls['transactionAmount'].hasError('pattern') && payLoanForm.controls['transactionAmount'].touched ? 'form-control is-invalid' : 'form-control'}}">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                    <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDesc'].hasError('required') && 
+                                    payLoanForm.controls['transactionDesc'].touched 
+                                    "><i>*Transaction description is required</i></div>
+                                <label class="col-form-label" for="appendedPrependedInput">Description</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-pencil"></i></span>
+                                    </div>
+                                    <input formControlName="transactionDesc" type="text" class="
+                                    {{payLoanForm.controls['transactionDesc'].hasError('required') && payLoanForm.controls['transactionDesc'].touched ? 'form-control is-invalid' : 'form-control'}}">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="payLoanModal.hide()">Cancel</button>
+                    <button type="button" class="btn btn-success" (click)="pay()">Pay</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

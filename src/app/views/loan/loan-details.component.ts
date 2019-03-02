@@ -15,7 +15,7 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
 export class LoanDetailsComponent implements OnInit {
     myDateValue: Date;
     loan: any;
-    loanStatments: any;
+    loanStatements: any;
     loanId: string;
     showStatements = 5;
     payLoanForm: FormGroup;
@@ -56,8 +56,8 @@ export class LoanDetailsComponent implements OnInit {
 
     getLoanAnalysisYear() {
         let array = [];
-        if (this.loanStatments != undefined) {
-            for (let statement of this.loanStatments) {
+        if (this.loanStatements != undefined) {
+            for (let statement of this.loanStatements) {
                 let date = statement.date;
                 let arr: string[] = date.split(" ");
                 array.push(arr[2])
@@ -83,7 +83,7 @@ export class LoanDetailsComponent implements OnInit {
     }
     getLoanStatements(loanId) {
         this.loanService.getLoanStatementsByLoanId(loanId).subscribe(data => {
-            this.loanStatments = data;
+            this.loanStatements = data;
             this.loanStatementsLoader = false;
             this.getLoanAnalysisYear();
         }, error => {

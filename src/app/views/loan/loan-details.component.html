@@ -158,7 +158,7 @@
             <div class="card-body">
                 <div class="chart-wrapper">
                     <span *ngIf="loanAnaysisYearlyLoader"><i class="fa fa-spinner fa-spin"></i> Loading...</span>
-                    <span class="text-center" *ngIf="!loanAnaysisYearly && !loanAnaysisYearlyLoader">No Data</span>
+                    <span class="text-center" *ngIf="!loanAnalysisYearly && !loanAnaysisYearlyLoader">No Data</span>
                     <canvas *ngIf="loanAnalysisYearly" baseChart class="chart" [data]="pieChartData"
                         [labels]="pieChartLabels" [chartType]="pieChartType" (chartHover)="chartHovered($event)"
                         (chartClick)="chartClicked($event)"></canvas>
@@ -177,10 +177,10 @@
             </div>
             <div class="card-body">
                 <span *ngIf="loanStatementsLoader"><i class="fa fa-spinner fa-spin"></i> Loading..</span>
-                <p *ngIf="loanStatments == ''" class="text-center"><i> <b><i
+                <p *ngIf="loanStatements == ''" class="text-center"><i> <b><i
                                 class="fa fa-smile-o"></i> No loan statments found</b></i>
                 </p>
-                <table *ngIf="loanStatments!='' && !loanStatementsLoader" class="table table-responsive-sm table-hover table-outline mb-0">
+                <table *ngIf="loanStatements!='' && !loanStatementsLoader" class="table table-responsive-sm table-hover table-outline mb-0">
                     <thead class="thead-light">
                         <tr>
                             <th>#</th>
@@ -191,7 +191,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let statment of loanStatments | slice:0:showStatements; let i=index">
+                        <tr *ngFor="let statment of loanStatements | slice:0:showStatements; let i=index">
                             <td>
                                 <h6>#{{i+1}}</h6>
                             </td>
@@ -229,11 +229,11 @@
                 </table>
                 <br>
                 <button style="margin: 0 40% 0 40%" class="btn btn-primary"
-                    *ngIf="loanStatements && showStatements < loanStatments.length" (click)="loadMoreStatements()">
+                    *ngIf="loanStatements && showStatements < loanStatements.length" (click)="loadMoreStatements()">
                     <i class="fa fa-arrow-down"></i> Show More
                 </button>
                 <button style="margin: 0 40% 0 40%" class="btn btn-primary"
-                    *ngIf=" loanStatements && loanStatments.length > 5 && showStatements > loanStatments.length" (click)="showLess()">
+                    *ngIf=" loanStatements && loanStatements.length > 5 && showStatements > loanStatements.length" (click)="showLess()">
                     <i class="fa fa-arrow-up"></i> Show less</button>
 
             </div>

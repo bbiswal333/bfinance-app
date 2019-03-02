@@ -2,7 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgModule } from '@angular/core';
-
+import { ChartsModule } from 'ng2-charts/ng2-charts';
 // Forms Component
 import { LoanComponent } from './loan.component';
 import {AddLoanComponent} from './add-loan.component';
@@ -22,7 +22,8 @@ import { DatepickerModule, BsDatepickerModule } from 'ngx-bootstrap/datepicker';
     LoanRoutingModule,
     ModalModule.forRoot(),
     BsDatepickerModule.forRoot(),
-    DatepickerModule.forRoot()
+    DatepickerModule.forRoot(),
+    ChartsModule
   ],
   declarations: [
     LoanComponent,

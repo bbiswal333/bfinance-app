@@ -1,9 +1,15 @@
 <div class="row">
+    <!-- <div class="col-sm-6 col-md-12" *ngIf="loanLoader">
+        <div class="card">
+            <div class="card-body">
+                <span>
+                    <i class="fa fa-spinner fa-spin"></i> Fetching loan details...
+                </span>
+            </div>
+        </div>
+    </div> -->
     <!-- col start -->
-    <div class="text-center" *ngIf="!loan">
-        <h5><i class="fa fa-spinner fa-spin"></i> Loading...</h5>
-    </div>
-    <div class="col-sm-6 col-md-12" *ngIf="loan!=null">
+    <div class="col-sm-6 col-md-12" *ngIf="loan">
         <div class="card card-accent-{{loan.loanType == 'EL'? 'success':'primary'}}">
             <div class="card-header">
                 <div *ngIf="loan.loanType=='EL'">
@@ -73,14 +79,14 @@
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-4">
-                            <label class="col-form-label">Total Amount Paid </label>
-                            <div class="input-group">
-                                <h5 style="color:purple">
-                                    <i class="fa fa-rupee"></i>&nbsp;
-                                    {{loan.totalPrincipalPaid}}
-                                </h5>
-                            </div>
+                        <label class="col-form-label">Total Amount Paid </label>
+                        <div class="input-group">
+                            <h5 style="color:purple">
+                                <i class="fa fa-rupee"></i>&nbsp;
+                                {{loan.totalPrincipalPaid}}
+                            </h5>
                         </div>
+                    </div>
                 </div>
                 <label class="col-form-label">Progress</label>
                 <div class="clearfix">
@@ -101,7 +107,7 @@
                     <div class="col-sm-6 col-md-12 text-center">
                         <button type="button" class="btn btn-danger btn-lg"><i class="fa fa-trash"></i> Delete
                             Loan</button>&nbsp;
-                        <button (click)="onPay()" type="button" class="btn btn-success btn-lg"><i
+                        <button [disabled]="isPay" (click)="onPay()" type="button" class="btn btn-success btn-lg"><i
                                 class="fa fa-rupee"></i> Pay</button>
                     </div>
                 </div>
@@ -109,23 +115,72 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-sm-6 col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Loan Analysis Monthly
+                <div class="card-header-actions">
+                    <a href="http://www.chartjs.org">
+                        <small class="text-muted">docs</small>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <span *ngIf="loanAnaysisMonthlyLoader"><i class="fa fa-spinner fa-spin"></i> Loading...</span>
+                <span class="text-center" *ngIf="!loanAnaysisMonthly && !loanAnaysisMonthlyLoader">No Data</span>
+                <div *ngIf="loanAnaysisMonthly" class="chart-wrapper">
+                    <canvas baseChart class="chart" [datasets]="barChartData" [labels]="barChartLabels"
+                        [options]="barChartOptions" [legend]="barChartLegend" [chartType]="barChartType"
+                        (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Loan Analysis Yearly
+                <div class="card-header-actions">
+                    <div class="input-group" *ngIf="loanAnalysisYearDropdown.length != 0">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                        </div>
+                        <select (change)="onLoanAnalysisYearChange($event.target.value)"
+                            class="form-control form-control-sm">
+                            <option *ngFor="let year of loanAnalysisYearDropdown" value="{{year}}">{{year}}</option>
+                            <!-- <option value="2018">2018</option> -->
+                        </select>
+                    </div>
 
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-wrapper">
+                    <span *ngIf="loanAnaysisYearlyLoader"><i class="fa fa-spinner fa-spin"></i> Loading...</span>
+                    <span class="text-center" *ngIf="!loanAnaysisYearly && !loanAnaysisYearlyLoader">No Data</span>
+                    <canvas *ngIf="loanAnalysisYearly" baseChart class="chart" [data]="pieChartData"
+                        [labels]="pieChartLabels" [chartType]="pieChartType" (chartHover)="chartHovered($event)"
+                        (chartClick)="chartClicked($event)"></canvas>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <!-- col start -->
-    <h5 *ngIf="!loanStatments"><i class="fa fa-spinner fa-spin"></i> Loading..</h5>
-
     <div class="col-sm-6 col-md-12">
-        <div class="card" *ngIf="loanStatments">
+        <div class="card">
             <div class="card-header">
                 <h5>Loan Statements</h5>
             </div>
             <div class="card-body">
-
-                <p *ngIf="loanStatments && loanStatments.length == 0" class="text-center"><i> <b><i
+                <span *ngIf="loanStatementsLoader"><i class="fa fa-spinner fa-spin"></i> Loading..</span>
+                <p *ngIf="loanStatments == ''" class="text-center"><i> <b><i
                                 class="fa fa-smile-o"></i> No loan statments found</b></i>
                 </p>
-                <table *ngIf="loanStatments && loanStatments.length > 0"
-                    class="table table-responsive-sm table-hover table-outline mb-0">
+                <table *ngIf="loanStatments!='' && !loanStatementsLoader" class="table table-responsive-sm table-hover table-outline mb-0">
                     <thead class="thead-light">
                         <tr>
                             <th>#</th>
@@ -174,11 +229,11 @@
                 </table>
                 <br>
                 <button style="margin: 0 40% 0 40%" class="btn btn-primary"
-                    *ngIf="showStatements < loanStatments.length" (click)="loadMoreStatements()">
+                    *ngIf="loanStatements && showStatements < loanStatments.length" (click)="loadMoreStatements()">
                     <i class="fa fa-arrow-down"></i> Show More
                 </button>
                 <button style="margin: 0 40% 0 40%" class="btn btn-primary"
-                    *ngIf="loanStatments.length > 5 && showStatements > loanStatments.length" (click)="showLess()">
+                    *ngIf=" loanStatements && loanStatments.length > 5 && showStatements > loanStatments.length" (click)="showLess()">
                     <i class="fa fa-arrow-up"></i> Show less</button>
 
             </div>
@@ -220,14 +275,14 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
-                                    <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDate'].hasError('required') && 
+                                <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDate'].hasError('required') && 
                                     payLoanForm.controls['transactionDate'].touched 
                                     "><i>*Transaction date is required</i></div>
 
-                                    <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDate'].hasError('pattern') && 
+                                <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDate'].hasError('pattern') && 
                                     payLoanForm.controls['transactionDate'].touched 
                                     "><i>*Please input date with this format dd-mm-yyyy</i></div>
-                                    
+
                                 <label class="col-form-label" for="appendedPrependedInput">Transaction Date</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -239,9 +294,8 @@
                                     payLoanForm.controls['transactionDate'].hasError('pattern') && 
                                     payLoanForm.controls['transactionDate'].touched
                                     ? 'form-control is-invalid' : 'form-control'
-                                    }}"
-                                        #dp="bsDatepicker" bsDatepicker
-                                        [(bsValue)]="myDateValue" value="{{ myDateValue | date:'dd-MM-yyyy' }}">
+                                    }}" #dp="bsDatepicker" bsDatepicker [(bsValue)]="myDateValue"
+                                        value="{{ myDateValue | date:'dd-MM-yyyy' }}">
 
                                 </div>
                             </div>
@@ -262,7 +316,8 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-rupee"></i></span>
                                     </div>
-                                    <input formControlName="transactionAmount" type="text" class="
+                                    <input formControlName="transactionAmount" type="text"
+                                        class="
                                     {{payLoanForm.controls['transactionAmount'].hasError('required') && payLoanForm.controls['transactionAmount'].touched || 
                                     payLoanForm.controls['transactionAmount'].hasError('pattern') && payLoanForm.controls['transactionAmount'].touched ? 'form-control is-invalid' : 'form-control'}}">
 
@@ -273,7 +328,7 @@
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="form-group">
-                                    <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDesc'].hasError('required') && 
+                                <div style="color:red" class="error" *ngIf="payLoanForm.controls['transactionDesc'].hasError('required') && 
                                     payLoanForm.controls['transactionDesc'].touched 
                                     "><i>*Transaction description is required</i></div>
                                 <label class="col-form-label" for="appendedPrependedInput">Description</label>
@@ -281,7 +336,8 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-pencil"></i></span>
                                     </div>
-                                    <input formControlName="transactionDesc" type="text" class="
+                                    <input formControlName="transactionDesc" type="text"
+                                        class="
                                     {{payLoanForm.controls['transactionDesc'].hasError('required') && payLoanForm.controls['transactionDesc'].touched ? 'form-control is-invalid' : 'form-control'}}">
 
                                 </div>

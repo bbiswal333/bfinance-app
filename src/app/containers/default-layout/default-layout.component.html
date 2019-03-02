@@ -4,10 +4,8 @@
   [sidebarToggler]="'lg'">
 
   <ul class="nav navbar-nav ml-auto">
-    <li class="nav-item d-md-down-none">
-      <a class="nav-link" href="#"><i class="icon-bell"></i><span class="badge badge-pill badge-danger">5</span></a>
-    </li>
-    <li class="nav-item dropdown" dropdown placement="bottom right"  [ngStyle]="getDisplayNameStyle()">
+    <li *ngIf="authService.displayNameLoader"><i class="fa fa-spinner fa-spin"></i></li>
+    <li  *ngIf="!authService.displayNameLoader" class="nav-item dropdown" dropdown placement="bottom right"  [ngStyle]="getDisplayNameStyle()">
       <a class="nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
         dropdownToggle (click)="false">
        <h3 style="color:white;" title="Welcome {{authService.displayName}}">{{authService.displayName}}</h3>

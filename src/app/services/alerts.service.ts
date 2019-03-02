@@ -11,17 +11,18 @@ export class AlertsService {
 
   state = false;
   successMessage: string;
+  errorMessage: string;
+  warningMessage: string;
   modalName: ReplaySubject<string> = new ReplaySubject();
 
 
   constructor() { }
 
-  showSNAModal(){
-    this.modalName.next('snaModal');
+  showModal(){
     return this.modalName.asObservable();
   }
 
-  showSEModal(){
+  showSessionExpiredModal(){
     this.modalName.next('seModal');
     return this.modalName.asObservable();
   }
@@ -29,6 +30,18 @@ export class AlertsService {
   showSuccessModal(msg:string){
     this.modalName.next('sModal');
     this.successMessage = msg;
+    return this.modalName.asObservable();
+  }
+
+  showErrorModal(msg:string){
+    this.modalName.next('eModal');
+    this.errorMessage = msg;
+    return this.modalName.asObservable();
+  }
+
+  showWarningModal(msg:string){
+    this.modalName.next('wModal');
+    this.warningMessage = msg;
     return this.modalName.asObservable();
   }
 

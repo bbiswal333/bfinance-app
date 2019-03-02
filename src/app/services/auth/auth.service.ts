@@ -16,6 +16,7 @@ export class AuthService {
   changePasswordUrl: string = this.appUrl + '/user/changePassword';
   displayName = ":)";
   user: any;
+  displayNameLoader = true;
 
   constructor(private http: HttpClient) { }
 
@@ -72,6 +73,7 @@ export class AuthService {
   showDisplayName() {
     this.getLoggedInUser().subscribe(data => {
       this.user = data;
+      this.displayNameLoader = false;
        //getting First alphanbet of FN and LN
        let firstname = this.user.firstname;
        let lastname = this.user.lastname;

@@ -9,37 +9,35 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrls: ['./alerts.component.scss']
 })
 export class AlertsComponent implements OnInit {
-  public myModal;
-  public largeModal;
-  public smallModal;
-  public primaryModal;
-  public successModal;
-  public warningModal;
-  public dangerModal;
-  public infoModal;
 
   modalName: string;
   counter = 0
 
   constructor(public alertsService: AlertsService, private authService: AuthService){}
 
-  @ViewChild('serviceNotAvailableModal') snaModal: ModalDirective;
   @ViewChild('sessionExpiredModal') seModal: ModalDirective;
   @ViewChild('successModal') sModal: ModalDirective;
+  @ViewChild('errorModal') eModal: ModalDirective;
+  @ViewChild('warningModal') wModal: ModalDirective;
+
+
 
   ngAfterViewInit(){ 
-    this.alertsService.showSNAModal().subscribe(data => {
+    this.alertsService.showModal().subscribe(data => {
       if(this.alertsService.state){
           this.alertsService.state = false;
           this.modalName = data;
-          if(this.modalName === 'snaModal'){
-            this.snaModal.show();
-          }
           if(this.modalName === 'seModal'){
             this.seModal.show();
           }
           if(this.modalName === 'sModal'){
             this.sModal.show();
+          }
+          if(this.modalName === 'eModal'){
+            this.eModal.show();
+          }
+          if(this.modalName === 'wModal'){
+            this.wModal.show();
           }
       }
     })

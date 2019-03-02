@@ -16,6 +16,13 @@ export class LoanService {
  
   constructor(private http: HttpClient, private authService: AuthService) { }
 
+  getLoanAnalysisYearly(loanId,year){
+    return this.http.get(this.appUrl+"/loan/"+loanId+"/analysis/yearly?year="+year);
+  }
+  getLoanAnalysisMonthly(loanId){
+    return this.http.get(this.appUrl+"/loan/"+loanId+"/analysis/monthly");
+  }
+
   payLoan(loanId,payload){
     return this.http.post(this.appUrl+ "/loan/"+loanId+"/statement",payload);
   }

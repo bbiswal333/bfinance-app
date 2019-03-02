@@ -20,7 +20,7 @@ export class ErrorInterceptor implements HttpInterceptor {
                 if (err.status === 401 && err.error.error === 'invalid_token') {
                     //alert("Session expired!");
                     this.alertsService.state = true;
-                    this.alertsService.showSEModal();
+                    this.alertsService.showSessionExpiredModal();
                     // auto logout if 401 response returned from api
                     //this.authService.logout();
                     //location.reload(true);
@@ -28,7 +28,8 @@ export class ErrorInterceptor implements HttpInterceptor {
                 if (err.status === 0) {
                    this.alertsService.state = true;
                     //show service is not available (SNA)
-                   this.alertsService.showSNAModal();
+                    this.alertsService.state = true;
+                   this.alertsService.showErrorModal("Service is currently not available. Please try again later.");
                 }
                 //const error = err.error.message || err.statusText;
                 return throwError(err);

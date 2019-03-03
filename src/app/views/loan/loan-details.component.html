@@ -105,7 +105,8 @@
                 &nbsp;
                 <div class="row">
                     <div class="col-sm-6 col-md-12 text-center">
-                        <button type="button" class="btn btn-danger btn-lg"><i class="fa fa-trash"></i> Delete
+                        <button (click)="onDelete()" type="button" class="btn btn-danger btn-lg"><i
+                                class="fa fa-trash"></i> Delete
                             Loan</button>&nbsp;
                         <button [disabled]="isPay" (click)="onPay()" type="button" class="btn btn-success btn-lg"><i
                                 class="fa fa-rupee"></i> Pay</button>
@@ -177,18 +178,18 @@
             </div>
             <div class="card-body">
                 <span *ngIf="loanStatementsLoader"><i class="fa fa-spinner fa-spin"></i> Loading..</span>
-                <p *ngIf="loanStatements == ''" class="text-center"><i> <b><i
-                                class="fa fa-smile-o"></i> No loan statments found</b></i>
+                <p *ngIf="loanStatements == ''" class="text-center"><i> <b><i class="fa fa-smile-o"></i> No loan
+                            statments found</b></i>
                 </p>
-                <table *ngIf="loanStatements!='' && !loanStatementsLoader" class="table table-responsive-sm table-hover table-outline mb-0">
+                <table *ngIf="loanStatements!='' && !loanStatementsLoader"
+                    class="table table-responsive-sm table-hover table-outline mb-0">
                     <thead class="thead-light">
                         <tr>
                             <th>#</th>
-                            <th class="text-center">Description</th>
+                            <th class="text-center">Description / Date</th>
                             <th class="text-center">Amount</th>
-                            <th class="text-center">Type</th>
-                            <th class="text-center">Date</th>
-                        </tr>
+                            <th class="text-center">Outstanding Balance</th>
+                          </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let statment of loanStatements | slice:0:showStatements; let i=index">
@@ -196,33 +197,26 @@
                                 <h6>#{{i+1}}</h6>
                             </td>
                             <td class="text-center">
+                                <!-- <div>{{statment.desc}}</div> -->
                                 <div>{{statment.desc}}</div>
+                                <div class="small text-muted">
+                                    <span>{{statment.date}}</span>
+                                </div>
 
                             </td>
                             <td class="text-center">
                                 <i class="fa fa-rupee"></i>
                                 <span style="color:red" *ngIf="statment.transactionType == 'DEBIT'">
-                                    <b>{{statment.transactionAmount}}</b>
+                                    <b> {{statment.transactionAmount}} <i style="color:red" class="fa fa-arrow-down"></i></b>
                                 </span>
                                 <span style="color:green" *ngIf="statment.transactionType == 'CREDIT'">
-                                    <b> {{statment.transactionAmount}}</b>
+                                    <b> {{statment.transactionAmount}}  <i style="color:green" class="fa fa-arrow-up"></i></b>
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span *ngIf="statment.transactionType == 'DEBIT'">
-                                    <i style="color:red" class="fa fa-arrow-down"></i>
-                                    <b>{{statment.transactionType}}</b>
-                                </span>
-                                <span *ngIf="statment.transactionType == 'CREDIT'">
-                                    <i style="color:green" class="fa fa-arrow-up"></i>
-                                    <b>{{statment.transactionType}}</b>
-                                </span>
+                                <b><i class="fa fa-rupee"></i> {{statment.outstandingAmount}}</b>
                             </td>
-                            <td class="text-center">
-                                {{statment.date}}
-                            </td>
-
-                        </tr>
+                          </tr>
 
 
                     </tbody>
@@ -233,7 +227,8 @@
                     <i class="fa fa-arrow-down"></i> Show More
                 </button>
                 <button style="margin: 0 40% 0 40%" class="btn btn-primary"
-                    *ngIf=" loanStatements && loanStatements.length > 5 && showStatements > loanStatements.length" (click)="showLess()">
+                    *ngIf=" loanStatements && loanStatements.length > 5 && showStatements > loanStatements.length"
+                    (click)="showLess()">
                     <i class="fa fa-arrow-up"></i> Show less</button>
 
             </div>
@@ -350,6 +345,28 @@
                     <button type="button" class="btn btn-success" (click)="pay()">Pay</button>
                 </div>
             </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div bsModal #loanDeletewarningModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-warning" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete Loan</h4>
+                <button type="button" class="close" (click)="loanDeletewarningModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p> All subsequent statements related to this loan will be deleted. Do you sure want to delete this
+                    loan?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="loanDeletewarningModal.hide()">Cancel</button>
+                <button type="button" class="btn btn-danger" (click)="deleteLoan()">Delete</button>
+            </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->

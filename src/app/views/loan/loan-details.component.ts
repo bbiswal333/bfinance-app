@@ -27,10 +27,22 @@ export class LoanDetailsComponent implements OnInit {
 
 
     @ViewChild('payLoanModal') payModal: ModalDirective
+    @ViewChild('loanDeletewarningModal') deleteModal: ModalDirective;
 
     constructor(private formBuilder: FormBuilder, private activeRoute: ActivatedRoute, private route: Router, public alertService: AlertsService, private authService: AuthService, private loaderService: LoaderService, private loanService: LoanService) {
 
     }
+    onDelete(){
+        this.deleteModal.show();
+    }
+    deleteLoan(){
+        this.loanService.deleteLoanById(this.loanId).subscribe(data => {
+          this.deleteModal.hide();
+          this.route.navigate(['/loan']);
+        },error=>{
+          console.log(error);
+        })
+      }
     createForm() {
         this.payLoanForm = this.formBuilder.group({
             transactionType: ['CREDIT', Validators.required],

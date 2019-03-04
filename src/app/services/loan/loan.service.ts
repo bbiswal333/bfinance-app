@@ -16,11 +16,14 @@ export class LoanService {
  
   constructor(private http: HttpClient, private authService: AuthService) { }
 
+  deleteLoanStatement(loanStatementId){
+    return this.http.delete(this.appUrl+"/loan/statement/"+loanStatementId);
+  }
   getLoanAnalysisYearly(loanId,year){
     return this.http.get(this.appUrl+"/loan/"+loanId+"/analysis/yearly?year="+year);
   }
-  getLoanAnalysisMonthly(loanId){
-    return this.http.get(this.appUrl+"/loan/"+loanId+"/analysis/monthly");
+  getLoanAnalysisMonthly(loanId,year){
+    return this.http.get(this.appUrl+"/loan/"+loanId+"/analysis/monthly?year="+year);
   }
 
   payLoan(loanId,payload){

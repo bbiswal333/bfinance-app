@@ -28,6 +28,7 @@ export class LoanDetailsComponent implements OnInit {
 
     @ViewChild('payLoanModal') payModal: ModalDirective
     @ViewChild('loanDeletewarningModal') deleteModal: ModalDirective;
+    @ViewChild('statementActionModal') statementModal: ModalDirective;
 
     constructor(private formBuilder: FormBuilder, private activeRoute: ActivatedRoute, private route: Router, public alertService: AlertsService, private authService: AuthService, private loaderService: LoaderService, private loanService: LoanService) {
 
@@ -60,9 +61,11 @@ export class LoanDetailsComponent implements OnInit {
     }
     ngAfterViewInit() {
         this.getLoanById(this.loanId);
-        this.getLoanAnalysisMonthly(this.loanId);
-        this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
         this.getLoanStatements(this.loanId);
+        this.getLoanAnalysisMonthly(this.loanId,this.getCurrentYear());
+        this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
+        
+       
 
     }
 
@@ -77,14 +80,53 @@ export class LoanDetailsComponent implements OnInit {
             this.loanAnalysisYearDropdown = array.filter(function (elem, index, self) {
                 return index === self.indexOf(elem);
             })
+            var data = {};
+            let temp = [];
+            for(let val of this.loanAnalysisYearDropdown){
+                if(this.loanAnalysisYearDropdown.length == 1){
+                    data = {
+                        value: val,
+                        selected: true
+                    }
+                    temp.push(data);
+                }else{
+                    let year = this.getCurrentYear();
+                    if(val == year){
+                        data = {
+                            value: val,
+                            selected: true
+                        }
+                        temp.push(data);
+                    }else{
+                        data = {
+                            value: val,
+                            selected: false
+                        }
+                        temp.push(data);
+                    }
+                    
+                }
+             }
+             this.loanAnalysisYearDropdown = temp;
+             if(this.loanAnalysisYearDropdown.length == 1){
+                this.getLoanAnalysisYearly(this.loanId, this.loanAnalysisYearDropdown[0]);
+             }
+             console.log(this.loanAnalysisYearDropdown)
+            
         }
     }
 
     onRefresh() {
         this.getLoanById(this.loanId);
-        this.getLoanAnalysisMonthly(this.loanId);
-        this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
         this.getLoanStatements(this.loanId);
+        if(this.loanAnalysisYearDropdown && this.loanAnalysisYearDropdown.length == 1){
+            this.getLoanAnalysisYearly(this.loanId, this.loanAnalysisYearDropdown[0].value);
+            this.getLoanAnalysisMonthly(this.loanId,this.loanAnalysisYearDropdown[0].value);
+        }else{
+            this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
+            this.getLoanAnalysisMonthly(this.loanId,this.getCurrentYear());
+        }
+        
     }
 
     loadMoreStatements() {
@@ -98,6 +140,13 @@ export class LoanDetailsComponent implements OnInit {
             this.loanStatements = data;
             this.loanStatementsLoader = false;
             this.getLoanAnalysisYear();
+            if(this.loanAnalysisYearDropdown && this.loanAnalysisYearDropdown.length == 1){
+                this.getLoanAnalysisYearly(this.loanId, this.loanAnalysisYearDropdown[0].value);
+                this.getLoanAnalysisMonthly(this.loanId,this.loanAnalysisYearDropdown[0].value);
+            }else{
+                this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
+                this.getLoanAnalysisMonthly(this.loanId,this.getCurrentYear());
+            }
         }, error => {
             console.log(error);
         })
@@ -180,8 +229,8 @@ export class LoanDetailsComponent implements OnInit {
     loanAnaysisMonthly: any;
     loanAnaysisMonthlyLoader = true;
 
-    getLoanAnalysisMonthly(loanId) {
-        this.loanService.getLoanAnalysisMonthly(loanId).subscribe(data => {
+    getLoanAnalysisMonthly(loanId,year) {
+        this.loanService.getLoanAnalysisMonthly(loanId,year).subscribe(data => {
             this.loanAnaysisMonthly = data;
             this.loanAnaysisMonthlyLoader = false;
             this.renderBarChart();
@@ -274,5 +323,25 @@ export class LoanDetailsComponent implements OnInit {
 
     onLoanAnalysisYearChange(year) {
         this.getLoanAnalysisYearly(this.loanId, year);
+    }
+    onLoanAnalysisMonthlyChange(year){
+        this.getLoanAnalysisMonthly(this.loanId, year);
+    }
+
+    statementAction: any;
+    onStatmentClick(statement){
+        this.statementAction = statement;
+        this.statementModal.show();
+    }
+
+    deleteLoanStatement(id){
+        this.loanService.deleteLoanStatement(id).subscribe(data=>{
+           this.statementModal.hide();
+           this.alertService.state = true;
+           this.onRefresh();
+           this.alertService.showSuccessModal("Loan Statement is deleted successfully.")
+        },error => {
+            console.log(error)
+        })
     }
 }

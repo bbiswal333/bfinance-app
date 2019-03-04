@@ -44,7 +44,7 @@
                             <div class="input-group">
                                 <h5>
                                     <i class="fa fa-rupee"></i>&nbsp;
-                                    {{loan.principalAmount}}
+                                    {{loan.principalAmount | number}}
                                 </h5>
                             </div>
                         </div>
@@ -54,7 +54,7 @@
                                 <span *ngIf="loan.balanceAmount ==0" class="badge badge-secondary">settled</span>
                                 <h3 *ngIf="loan.balanceAmount !=0" style="color: tomato; font-weight: bold">
                                     <i class="fa fa-rupee"></i>&nbsp;
-                                    {{loan.balanceAmount}}
+                                    {{loan.balanceAmount | number}}
                                 </h3>
                             </div>
                         </div>

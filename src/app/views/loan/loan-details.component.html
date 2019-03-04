@@ -36,7 +36,7 @@
                         <div class="input-group">
                             <h5>
                                 <i class="fa fa-rupee"></i>&nbsp;
-                                {{loan.principalAmount}}
+                                {{loan.principalAmount | number }}
                             </h5>
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                             <span *ngIf="loan.balanceAmount ==0" class="badge badge-secondary">settled</span>
                             <h3 *ngIf="loan.balanceAmount !=0" style="color: tomato; font-weight: bold">
                                 <i class="fa fa-rupee"></i>&nbsp;
-                                {{loan.balanceAmount}}
+                                {{loan.balanceAmount | number }}
                             </h3>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                         <div class="input-group">
                             <h5 style="color:green">
                                 <i class="fa fa-rupee"></i>&nbsp;
-                                {{loan.totalPrincipalPaid - loan.totalInterestPaid}}
+                                {{loan.totalPrincipalPaid - loan.totalInterestPaid | number}}
                             </h5>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                         <div class="input-group">
                             <h5 style="color:orchid">
                                 <i class="fa fa-rupee"></i>&nbsp;
-                                {{loan.totalInterestPaid}}
+                                {{loan.totalInterestPaid | number}}
                             </h5>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
                         <div class="input-group">
                             <h5 style="color:purple">
                                 <i class="fa fa-rupee"></i>&nbsp;
-                                {{loan.totalPrincipalPaid}}
+                                {{loan.totalPrincipalPaid | number}}
                             </h5>
                         </div>
                     </div>
@@ -207,14 +207,14 @@
                             <td class="text-center">
                                 <i class="fa fa-rupee"></i>
                                 <span style="color:red" *ngIf="statment.transactionType == 'DEBIT'">
-                                    <b> {{statment.transactionAmount}} <i style="color:red" class="fa fa-arrow-down"></i></b>
+                                    <b> {{statment.transactionAmount | number}} <i style="color:red" class="fa fa-arrow-down"></i></b>
                                 </span>
                                 <span style="color:green" *ngIf="statment.transactionType == 'CREDIT'">
-                                    <b> {{statment.transactionAmount}}  <i style="color:green" class="fa fa-arrow-up"></i></b>
+                                    <b> {{statment.transactionAmount | number}}  <i style="color:green" class="fa fa-arrow-up"></i></b>
                                 </span>
                             </td>
                             <td class="text-center">
-                                <b><i class="fa fa-rupee"></i> {{statment.outstandingAmount}}</b>
+                                <b><i class="fa fa-rupee"></i> {{statment.outstandingAmount | number}}</b>
                             </td>
                           </tr>
 

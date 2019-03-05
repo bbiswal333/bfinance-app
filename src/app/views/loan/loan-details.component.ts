@@ -13,7 +13,11 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
 })
 
 export class LoanDetailsComponent implements OnInit {
+
+    filterForm: FormGroup;
     myDateValue: Date;
+    fromDate: Date;
+    toDate: Date;
     loan: any;
     loanStatements: any;
     loanId: string;
@@ -23,12 +27,14 @@ export class LoanDetailsComponent implements OnInit {
     loanAnalysisYearDropdown: any[] = [];
     loanLoader = true;
     loanStatementsLoader = true;
+    statementHeaderText: string;
     public payLoanModal;
 
 
     @ViewChild('payLoanModal') payModal: ModalDirective
     @ViewChild('loanDeletewarningModal') deleteModal: ModalDirective;
     @ViewChild('statementActionModal') statementModal: ModalDirective;
+    @ViewChild('filterStatementModal') filterModal: ModalDirective;
 
     constructor(private formBuilder: FormBuilder, private activeRoute: ActivatedRoute, private route: Router, public alertService: AlertsService, private authService: AuthService, private loaderService: LoaderService, private loanService: LoanService) {
 
@@ -52,10 +58,22 @@ export class LoanDetailsComponent implements OnInit {
             transactionDate: [this.myDateValue, [Validators.required, Validators.pattern("")]]
 
         });
+
+        this.filterForm = this.formBuilder.group({
+            fromDateField: [this.fromDate, Validators.required],
+            toDateField: [this.toDate, Validators.required]
+
+        });
     }
 
     ngOnInit() {
         this.myDateValue = new Date();
+        this.toDate = new Date();
+
+        let d = new Date();
+        d.setMonth(d.getMonth()-1);
+        this.fromDate = d;
+        
         this.loanId = this.activeRoute.snapshot.params.loanId;
         this.createForm();
     }
@@ -68,7 +86,15 @@ export class LoanDetailsComponent implements OnInit {
        
 
     }
-
+    onFilterSubmit(){
+        if (this.filterForm.invalid) {
+            return;
+        }
+        let from = this.convertDate1(this.filterForm.controls.fromDateField.value);
+        let to = this.convertDate1(this.filterForm.controls.toDateField.value);
+        
+       this.filterLoanStatementsCustom(this.loanId,from,to);
+    }
     getLoanAnalysisYear() {
         let array = [];
         if (this.loanStatements != undefined) {
@@ -135,8 +161,63 @@ export class LoanDetailsComponent implements OnInit {
     showLess() {
         this.showStatements = 5
     }
+
+    //filter statements
+    onStatementFilterChange(value){
+        
+        if(value == 'CUSTOM'){
+            this.filterModal.show();
+            return;
+        }
+        if(value == 'DEFAULT'){
+            this.getLoanStatements(this.loanId);
+            return;
+        }
+        if(value == 'CURRENT_MONTH'){
+            this.statementHeaderText = "Showing Transactions for the current month";
+            this.filterLoanStatementsDefault(this.loanId,'CURRENT_MONTH');
+            return;
+        }
+        if(value == 'LAST_1_MONTH'){
+            this.statementHeaderText = "Showing Transactions for the Last 1 month";
+            this.filterLoanStatementsDefault(this.loanId,'LAST_1_MONTH');
+            return;
+        }
+        if(value == 'LAST_3_MONTH'){
+            this.statementHeaderText = "Showing Transactions for the Last 3 months";
+            this.filterLoanStatementsDefault(this.loanId,'LAST_3_MONTH');
+            return;
+        }
+        if(value == 'LAST_6_MONTH'){
+            this.statementHeaderText = "Showing Transactions for the Last 6 months";
+            this.filterLoanStatementsDefault(this.loanId,'LAST_6_MONTH');
+            return;
+        }
+    }
+    filterLoanStatementsCustom(loanId,from,to){
+        this.loanStatementsLoader = true;
+        this.loanService.filterStatementCustom(loanId,from,to).subscribe(data => {
+            this.statementHeaderText = "Showing Transactions from "+from+"  to  "+to;
+            this.loanStatements = data;
+            this.loanStatementsLoader = false;
+            this.filterModal.hide()
+        },error => {
+            console.log(error);
+        })
+    }
+    filterLoanStatementsDefault(loanId,filterType){
+        this.loanStatementsLoader = true;
+        this.loanService.filterStatementDefault(loanId,filterType).subscribe(data => {
+            this.loanStatements = data;
+            this.loanStatementsLoader = false;
+        },error => {
+            console.log(error);
+        })
+    }
+
     getLoanStatements(loanId) {
         this.loanService.getLoanStatementsByLoanId(loanId).subscribe(data => {
+            this.statementHeaderText = "Showing All Transactions";
             this.loanStatements = data;
             this.loanStatementsLoader = false;
             this.getLoanAnalysisYear();
@@ -209,6 +290,13 @@ export class LoanDetailsComponent implements OnInit {
             mnth = ("0" + (date.getMonth() + 1)).slice(-2),
             day = ("0" + date.getDate()).slice(-2);
         return [day, mnth, date.getFullYear()].join("-");
+    }
+    //dd-mm-yyyy
+    convertDate1(str) {
+        let date = new Date(str),
+            mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+            day = ("0" + date.getDate()).slice(-2);
+        return [date.getFullYear(), mnth, day].join("-");
     }
 
     // barChart

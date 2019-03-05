@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { AppComponent } from "../../app.component";
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { Observable, from } from "rxjs";
 
 import { AuthService } from '../auth/auth.service';
@@ -15,6 +15,13 @@ export class LoanService {
   loanProgressPercent: number;
  
   constructor(private http: HttpClient, private authService: AuthService) { }
+
+  filterStatementDefault(loanId,filterType){
+    return this.http.get(this.appUrl+"/loan/"+loanId+"/statement/filter/default?filterType="+filterType);
+  }
+  filterStatementCustom(loanId,from,to){
+    return this.http.get(this.appUrl+"/loan/"+loanId+"/statement/filter/custom?from="+from+"&to="+to);
+  }
 
   deleteLoanStatement(loanStatementId){
     return this.http.delete(this.appUrl+"/loan/statement/"+loanStatementId);

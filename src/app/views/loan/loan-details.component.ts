@@ -14,6 +14,7 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
 
 export class LoanDetailsComponent implements OnInit {
 
+    enableAutoPayForm: FormGroup;
     filterForm: FormGroup;
     myDateValue: Date;
     fromDate: Date;
@@ -30,26 +31,33 @@ export class LoanDetailsComponent implements OnInit {
     statementHeaderText: string;
     public payLoanModal;
 
+    autoPayNoteAmount;
+    autoPayNotePayOn;
+    autoPayNoteVisible = false;
+    isAutoPayEnabled = false;
+    autoPayInfo: string;
+    loanAutoPay: any;
 
     @ViewChild('payLoanModal') payModal: ModalDirective
     @ViewChild('loanDeletewarningModal') deleteModal: ModalDirective;
     @ViewChild('statementActionModal') statementModal: ModalDirective;
     @ViewChild('filterStatementModal') filterModal: ModalDirective;
+    @ViewChild('enableAutoPayModal') enableAutoPayModal: ModalDirective;
 
     constructor(private formBuilder: FormBuilder, private activeRoute: ActivatedRoute, private route: Router, public alertService: AlertsService, private authService: AuthService, private loaderService: LoaderService, private loanService: LoanService) {
 
     }
-    onDelete(){
+    onDelete() {
         this.deleteModal.show();
     }
-    deleteLoan(){
+    deleteLoan() {
         this.loanService.deleteLoanById(this.loanId).subscribe(data => {
-          this.deleteModal.hide();
-          this.route.navigate(['/loan']);
-        },error=>{
-          console.log(error);
+            this.deleteModal.hide();
+            this.route.navigate(['/loan']);
+        }, error => {
+            console.log(error);
         })
-      }
+    }
     createForm() {
         this.payLoanForm = this.formBuilder.group({
             transactionType: ['CREDIT', Validators.required],
@@ -64,6 +72,13 @@ export class LoanDetailsComponent implements OnInit {
             toDateField: [this.toDate, Validators.required]
 
         });
+
+        this.enableAutoPayForm = this.formBuilder.group({
+            transactionAmount: ['',  [Validators.required, Validators.pattern("^[0-9]*$")]],
+            payOn: ['', [Validators.required,Validators.pattern("^([1-9]|1[0])$")]]
+
+        });
+
     }
 
     ngOnInit() {
@@ -71,29 +86,30 @@ export class LoanDetailsComponent implements OnInit {
         this.toDate = new Date();
 
         let d = new Date();
-        d.setMonth(d.getMonth()-1);
+        d.setMonth(d.getMonth() - 1);
         this.fromDate = d;
-        
+
         this.loanId = this.activeRoute.snapshot.params.loanId;
         this.createForm();
     }
     ngAfterViewInit() {
+        this.checkAutoPay();
         this.getLoanById(this.loanId);
         this.getLoanStatements(this.loanId);
-        this.getLoanAnalysisMonthly(this.loanId,this.getCurrentYear());
+        this.getLoanAnalysisMonthly(this.loanId, this.getCurrentYear());
         this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
-        
-       
+
+
 
     }
-    onFilterSubmit(){
+    onFilterSubmit() {
         if (this.filterForm.invalid) {
             return;
         }
         let from = this.convertDate1(this.filterForm.controls.fromDateField.value);
         let to = this.convertDate1(this.filterForm.controls.toDateField.value);
-        
-       this.filterLoanStatementsCustom(this.loanId,from,to);
+
+        this.filterLoanStatementsCustom(this.loanId, from, to);
     }
     getLoanAnalysisYear() {
         let array = [];
@@ -108,51 +124,51 @@ export class LoanDetailsComponent implements OnInit {
             })
             var data = {};
             let temp = [];
-            for(let val of this.loanAnalysisYearDropdown){
-                if(this.loanAnalysisYearDropdown.length == 1){
+            for (let val of this.loanAnalysisYearDropdown) {
+                if (this.loanAnalysisYearDropdown.length == 1) {
                     data = {
                         value: val,
                         selected: true
                     }
                     temp.push(data);
-                }else{
+                } else {
                     let year = this.getCurrentYear();
-                    if(val == year){
+                    if (val == year) {
                         data = {
                             value: val,
                             selected: true
                         }
                         temp.push(data);
-                    }else{
+                    } else {
                         data = {
                             value: val,
                             selected: false
                         }
                         temp.push(data);
                     }
-                    
+
                 }
-             }
-             this.loanAnalysisYearDropdown = temp;
-             if(this.loanAnalysisYearDropdown.length == 1){
+            }
+            this.loanAnalysisYearDropdown = temp;
+            if (this.loanAnalysisYearDropdown.length == 1) {
                 this.getLoanAnalysisYearly(this.loanId, this.loanAnalysisYearDropdown[0]);
-             }
-             console.log(this.loanAnalysisYearDropdown)
-            
+            }
+            console.log(this.loanAnalysisYearDropdown)
+
         }
     }
 
     onRefresh() {
         this.getLoanById(this.loanId);
         this.getLoanStatements(this.loanId);
-        if(this.loanAnalysisYearDropdown && this.loanAnalysisYearDropdown.length == 1){
+        if (this.loanAnalysisYearDropdown && this.loanAnalysisYearDropdown.length == 1) {
             this.getLoanAnalysisYearly(this.loanId, this.loanAnalysisYearDropdown[0].value);
-            this.getLoanAnalysisMonthly(this.loanId,this.loanAnalysisYearDropdown[0].value);
-        }else{
+            this.getLoanAnalysisMonthly(this.loanId, this.loanAnalysisYearDropdown[0].value);
+        } else {
             this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
-            this.getLoanAnalysisMonthly(this.loanId,this.getCurrentYear());
+            this.getLoanAnalysisMonthly(this.loanId, this.getCurrentYear());
         }
-        
+
     }
 
     loadMoreStatements() {
@@ -163,54 +179,54 @@ export class LoanDetailsComponent implements OnInit {
     }
 
     //filter statements
-    onStatementFilterChange(value){
-        
-        if(value == 'CUSTOM'){
+    onStatementFilterChange(value) {
+
+        if (value == 'CUSTOM') {
             this.filterModal.show();
             return;
         }
-        if(value == 'DEFAULT'){
+        if (value == 'DEFAULT') {
             this.getLoanStatements(this.loanId);
             return;
         }
-        if(value == 'CURRENT_MONTH'){
+        if (value == 'CURRENT_MONTH') {
             this.statementHeaderText = "Showing Transactions for the current month";
-            this.filterLoanStatementsDefault(this.loanId,'CURRENT_MONTH');
+            this.filterLoanStatementsDefault(this.loanId, 'CURRENT_MONTH');
             return;
         }
-        if(value == 'LAST_1_MONTH'){
+        if (value == 'LAST_1_MONTH') {
             this.statementHeaderText = "Showing Transactions for the Last 1 month";
-            this.filterLoanStatementsDefault(this.loanId,'LAST_1_MONTH');
+            this.filterLoanStatementsDefault(this.loanId, 'LAST_1_MONTH');
             return;
         }
-        if(value == 'LAST_3_MONTH'){
+        if (value == 'LAST_3_MONTH') {
             this.statementHeaderText = "Showing Transactions for the Last 3 months";
-            this.filterLoanStatementsDefault(this.loanId,'LAST_3_MONTH');
+            this.filterLoanStatementsDefault(this.loanId, 'LAST_3_MONTH');
             return;
         }
-        if(value == 'LAST_6_MONTH'){
+        if (value == 'LAST_6_MONTH') {
             this.statementHeaderText = "Showing Transactions for the Last 6 months";
-            this.filterLoanStatementsDefault(this.loanId,'LAST_6_MONTH');
+            this.filterLoanStatementsDefault(this.loanId, 'LAST_6_MONTH');
             return;
         }
     }
-    filterLoanStatementsCustom(loanId,from,to){
+    filterLoanStatementsCustom(loanId, from, to) {
         this.loanStatementsLoader = true;
-        this.loanService.filterStatementCustom(loanId,from,to).subscribe(data => {
-            this.statementHeaderText = "Showing Transactions from "+from+"  to  "+to;
+        this.loanService.filterStatementCustom(loanId, from, to).subscribe(data => {
+            this.statementHeaderText = "Showing Transactions from " + from + "  to  " + to;
             this.loanStatements = data;
             this.loanStatementsLoader = false;
             this.filterModal.hide()
-        },error => {
+        }, error => {
             console.log(error);
         })
     }
-    filterLoanStatementsDefault(loanId,filterType){
+    filterLoanStatementsDefault(loanId, filterType) {
         this.loanStatementsLoader = true;
-        this.loanService.filterStatementDefault(loanId,filterType).subscribe(data => {
+        this.loanService.filterStatementDefault(loanId, filterType).subscribe(data => {
             this.loanStatements = data;
             this.loanStatementsLoader = false;
-        },error => {
+        }, error => {
             console.log(error);
         })
     }
@@ -221,12 +237,12 @@ export class LoanDetailsComponent implements OnInit {
             this.loanStatements = data;
             this.loanStatementsLoader = false;
             this.getLoanAnalysisYear();
-            if(this.loanAnalysisYearDropdown && this.loanAnalysisYearDropdown.length == 1){
+            if (this.loanAnalysisYearDropdown && this.loanAnalysisYearDropdown.length == 1) {
                 this.getLoanAnalysisYearly(this.loanId, this.loanAnalysisYearDropdown[0].value);
-                this.getLoanAnalysisMonthly(this.loanId,this.loanAnalysisYearDropdown[0].value);
-            }else{
+                this.getLoanAnalysisMonthly(this.loanId, this.loanAnalysisYearDropdown[0].value);
+            } else {
                 this.getLoanAnalysisYearly(this.loanId, this.getCurrentYear());
-                this.getLoanAnalysisMonthly(this.loanId,this.getCurrentYear());
+                this.getLoanAnalysisMonthly(this.loanId, this.getCurrentYear());
             }
         }, error => {
             console.log(error);
@@ -317,8 +333,8 @@ export class LoanDetailsComponent implements OnInit {
     loanAnaysisMonthly: any;
     loanAnaysisMonthlyLoader = true;
 
-    getLoanAnalysisMonthly(loanId,year) {
-        this.loanService.getLoanAnalysisMonthly(loanId,year).subscribe(data => {
+    getLoanAnalysisMonthly(loanId, year) {
+        this.loanService.getLoanAnalysisMonthly(loanId, year).subscribe(data => {
             this.loanAnaysisMonthly = data;
             this.loanAnaysisMonthlyLoader = false;
             this.renderBarChart();
@@ -412,24 +428,108 @@ export class LoanDetailsComponent implements OnInit {
     onLoanAnalysisYearChange(year) {
         this.getLoanAnalysisYearly(this.loanId, year);
     }
-    onLoanAnalysisMonthlyChange(year){
+    onLoanAnalysisMonthlyChange(year) {
         this.getLoanAnalysisMonthly(this.loanId, year);
     }
 
     statementAction: any;
-    onStatmentClick(statement){
+    onStatmentClick(statement) {
         this.statementAction = statement;
         this.statementModal.show();
     }
 
-    deleteLoanStatement(id){
-        this.loanService.deleteLoanStatement(id).subscribe(data=>{
-           this.statementModal.hide();
-           this.alertService.state = true;
-           this.onRefresh();
-           this.alertService.showSuccessModal("Loan Statement is deleted successfully.")
-        },error => {
+    deleteLoanStatement(id) {
+        this.loanService.deleteLoanStatement(id).subscribe(data => {
+            this.statementModal.hide();
+            this.alertService.state = true;
+            this.onRefresh();
+            this.alertService.showSuccessModal("Loan Statement is deleted successfully.")
+        }, error => {
             console.log(error)
         })
     }
+
+    onEnableAutoPay() {
+        this.enableAutoPayModal.show();
+
+    }
+
+    autoPayNote(){
+        let payOn = this.enableAutoPayForm.controls.payOn.value;
+        let amount = this.enableAutoPayForm.controls.transactionAmount.value;
+        if (payOn != '' && amount != '') {
+            this.autoPayNoteVisible = true;
+            this.autoPayNoteAmount = amount;
+            this.autoPayNotePayOn = this.decoratePayOn(payOn);
+        }
+    }
+
+    autoPayOnKeyUp() {
+        this.autoPayNote();
+    }
+
+    decoratePayOn(payOn){
+        if(payOn === '1'){
+            return '1st';
+        }
+        if(payOn === '2'){
+            return '2nd';
+        }
+        if(payOn === '3'){
+            return '3rd';
+        }
+        else{
+            return payOn+"th";
+        }
+    }
+
+    submitLoanAutoPay(){
+        // if (this.enableAutoPayForm.invalid) {
+        //     return;
+        // }
+        let payload = {
+            "transactionAmount": this.enableAutoPayForm.controls.transactionAmount.value,
+            "payOn": this.enableAutoPayForm.controls.payOn.value
+        }
+        this.loanService.enableLoanAutoPay(this.loanId, payload).subscribe(data => {
+            this.checkAutoPay();
+            this.isAutoPayEnabled = true;
+            this.enableAutoPayModal.hide();
+            this.alertService.state = true;
+            this.alertService.showSuccessModal('Auto Pay is enabled');
+        }, error => {
+            this.alertService.state = true;
+            this.alertService.showErrorModal('Error while enabling loan auto pay.');
+        })
+    }
+
+    checkAutoPay(){
+        this.loanService.checkAutoPay(this.loanId).subscribe(data => {
+            if(data === '' || data === null){
+                this.isAutoPayEnabled = false;
+                this.autoPayInfo = null;
+            }else{
+                this.loanAutoPay = data;
+                this.autoPayInfo = 'Amount of ₹ '+this.loanAutoPay.transactionAmount+' will be auto paid on '+this.decoratePayOn(this.loanAutoPay.payOn)+' of every month at 10.00 AM.';
+                this.isAutoPayEnabled = true;
+            }
+
+        }, error => {
+            this.alertService.state = true;
+            this.alertService.showErrorModal('Error while checking loan auto pay.');
+        });
+    }
+
+    disableAutoPay(){
+        this.loanService.disableAutoPay(this.loanId).subscribe(data => {
+            this.isAutoPayEnabled = false;
+            this.alertService.state = true;
+            this.checkAutoPay();
+            this.alertService.showSuccessModal('Auto Pay is disabled');
+        }, error => {
+            this.alertService.state = true;
+            this.alertService.showErrorModal('Error while disabling loan auto pay.');
+        });
+    }
+
 }

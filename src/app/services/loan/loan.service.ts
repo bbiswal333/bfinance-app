@@ -16,6 +16,18 @@ export class LoanService {
  
   constructor(private http: HttpClient, private authService: AuthService) { }
 
+  disableAutoPay(loanId){
+    return this.http.delete(this.appUrl+ "/loan/"+loanId+"/autopay");
+  }
+
+  checkAutoPay(loanId){
+    return this.http.get(this.appUrl+ "/loan/"+loanId+"/autopay");
+  }
+
+  enableLoanAutoPay(loanId,payload){
+    return this.http.post(this.appUrl+ "/loan/"+loanId+"/autopay",payload);
+  }
+
   filterStatementDefault(loanId,filterType){
     return this.http.get(this.appUrl+"/loan/"+loanId+"/statement/filter/default?filterType="+filterType);
   }

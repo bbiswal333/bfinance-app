@@ -20,6 +20,7 @@
                     <span class="badge badge-primary">Home Loan</span>&nbsp;
                     <span *ngIf="loan.balanceAmount == 0" class="badge badge-success">Loan closed</span>
                 </div>
+
             </div>
             <div [ngStyle]="getClosedLoanStyle(loan.balanceAmount)" class="card-body">
                 <label class="col-form-label"><i class="fa fa-key"></i> Loan ID &nbsp;&nbsp; </label>
@@ -104,12 +105,38 @@
                 </div>
                 &nbsp;
                 <div class="row">
-                    <div class="col-sm-6 col-md-12 text-center">
-                        <button (click)="onDelete()" type="button" class="btn btn-danger btn-lg"><i
-                                class="fa fa-trash"></i> Delete
-                            Loan</button>&nbsp;
-                        <button [disabled]="isPay" (click)="onPay()" type="button" class="btn btn-success btn-lg"><i
-                                class="fa fa-rupee"></i> Pay</button>
+
+                    <div class="input-group text-center">
+                        <div class="col-sm-6 col-md-12 ">
+                            <button (click)="onDelete()" type="button" class="btn btn-danger btn-lg"><i
+                                    class="fa fa-trash"></i> Delete
+                                Loan</button>
+                            &nbsp;
+                            <button [disabled]="isPay" (click)="onPay()" type="button" class="btn btn-success btn-lg"><i
+                                    class="fa fa-rupee"></i> Pay</button>
+                            &nbsp;
+                        </div>
+                    </div>
+                </div>
+                &nbsp;
+                <div class="row">
+                    <div class="input-group text-center">
+                        <div class="col-sm-6 col-md-12 ">
+                            <button *ngIf="!isAutoPayEnabled" [disabled]="isPay" (click)="onEnableAutoPay()"
+                                type="button" class="btn btn-primary btn-lg"><i class="fa fa-check-circle"></i> Enable
+                                Auto
+                                Pay</button>
+
+
+                            <button *ngIf="isAutoPayEnabled" [disabled]="isPay" (click)="disableAutoPay()" type="button"
+                                class="btn btn-warning btn-lg"><i class="fa fa-times-circle"></i> Disable Auto
+                                Pay</button>
+
+                            <p *ngIf="autoPayInfo">
+                                <i class="fa fa-info-circle"></i>
+                                <span style="color: gray"><i>{{autoPayInfo}}</i></span>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -452,7 +479,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form  [formGroup] ="filterForm">
+                <form [formGroup]="filterForm">
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="form-group">
@@ -462,8 +489,9 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-calendar"></i></span>
                                     </div>
-                                    <input formControlName="fromDateField" type="text" class="form-control" #dp="bsDatepicker" bsDatepicker
-                                        [(bsValue)]="fromDate" value="{{ fromDate | date:'dd-MM-yyyy' }}">
+                                    <input formControlName="fromDateField" type="text" class="form-control"
+                                        #dp="bsDatepicker" bsDatepicker [(bsValue)]="fromDate"
+                                        value="{{ fromDate | date:'dd-MM-yyyy' }}">
                                 </div>
                             </div>
                         </div>
@@ -475,8 +503,9 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-calendar"></i></span>
                                     </div>
-                                    <input formControlName="toDateField" type="text" class="form-control" #dp="bsDatepicker" bsDatepicker
-                                        [(bsValue)]="toDate" value="{{ toDate | date:'dd-MM-yyyy' }}">
+                                    <input formControlName="toDateField" type="text" class="form-control"
+                                        #dp="bsDatepicker" bsDatepicker [(bsValue)]="toDate"
+                                        value="{{ toDate | date:'dd-MM-yyyy' }}">
                                 </div>
                             </div>
                         </div>
@@ -487,6 +516,72 @@
                 <button (click)="onFilterSubmit()" type="button" class="btn btn-primary">Submit</button>
 
             </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div bsModal #enableAutoPayModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Enable Auto Pay</h4>
+                <button type="button" class="close" (click)="enableAutoPayModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form [formGroup]="enableAutoPayForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-form-label" for="appendedPrependedInput">Loan ID : {{loanId}}</label>
+                            </div>
+                            <div class="form-group">
+                                <div style="color:red" class="error" *ngIf="enableAutoPayForm.controls['transactionAmount'].hasError('required') && 
+                                enableAutoPayForm.controls['transactionAmount'].touched 
+                                    "><i>*Transaction amount is required</i></div>
+                                <div style="color:red" class="error" *ngIf="enableAutoPayForm.controls['transactionAmount'].hasError('pattern') && 
+                                enableAutoPayForm.controls['transactionAmount'].touched 
+                                    "><i>*Transaction amount value should be numeric</i></div>
+                                <label class="col-form-label" for="appendedPrependedInput">Transaction Amount</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-rupee"></i></span>
+                                    </div>
+                                    <input (keyup)="autoPayOnKeyUp()" formControlName="transactionAmount" type="text"
+                                        class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div style="color:red" class="error" *ngIf="enableAutoPayForm.controls['payOn'].hasError('required') && 
+                                    enableAutoPayForm.controls['payOn'].touched 
+                                        "><i>*PayOn is required</i></div>
+                                <div style="color:red" class="error" *ngIf="enableAutoPayForm.controls['payOn'].hasError('pattern') && 
+                                    enableAutoPayForm.controls['payOn'].touched 
+                                        "><i>*PayOn value should be between 1 to 15</i></div>
+                                <label class="col-form-label" for="appendedPrependedInput">Enter the date (1 - 15) to
+                                    auto pay in every month</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                    <input (keyup)="autoPayOnKeyUp()" formControlName="payOn" type="text"
+                                        class="form-control" />
+                                </div>
+                            </div>
+                            <p *ngIf="autoPayNoteVisible"><i>Amount of &nbsp;<i class="fa fa-rupee"></i>
+                                    <b>{{autoPayNoteAmount | number}}</b> will be auto paid on
+                                    <b>{{autoPayNotePayOn}}</b> of every month at 10.00 AM.</i></p>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="enableAutoPayModal.hide()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" (click)="submitLoanAutoPay()">Enable</button>
+                </div>
+            </form>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->

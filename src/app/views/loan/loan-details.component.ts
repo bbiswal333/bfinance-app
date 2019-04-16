@@ -75,7 +75,7 @@ export class LoanDetailsComponent implements OnInit {
 
         this.enableAutoPayForm = this.formBuilder.group({
             transactionAmount: ['',  [Validators.required, Validators.pattern("^[0-9]*$")]],
-            payOn: ['', [Validators.required,Validators.pattern("^([1-9]|1[0])$")]]
+            payOn: ['', [Validators.required,Validators.pattern("^(15|[1-9]?)$")]]
 
         });
 
@@ -484,9 +484,9 @@ export class LoanDetailsComponent implements OnInit {
     }
 
     submitLoanAutoPay(){
-        // if (this.enableAutoPayForm.invalid) {
-        //     return;
-        // }
+        if (this.enableAutoPayForm.invalid) {
+            return;
+        }
         let payload = {
             "transactionAmount": this.enableAutoPayForm.controls.transactionAmount.value,
             "payOn": this.enableAutoPayForm.controls.payOn.value

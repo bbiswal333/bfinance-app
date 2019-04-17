@@ -469,13 +469,13 @@ export class LoanDetailsComponent implements OnInit {
     }
 
     decoratePayOn(payOn){
-        if(payOn === '1'){
+        if(payOn === '1' || payOn === 1){
             return '1st';
         }
-        if(payOn === '2'){
+        if(payOn === '2' || payOn === 2){
             return '2nd';
         }
-        if(payOn === '3'){
+        if(payOn === '3' || payOn === 3){
             return '3rd';
         }
         else{
